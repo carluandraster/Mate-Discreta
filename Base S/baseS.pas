@@ -1,17 +1,8 @@
 Program baseS;
 
-const
-    tope=255;
-
-type
-    TV = array [1..tope] of char;
-
 // Subprogramas
 
-Procedure de10aS (var sadico: TV; var N,S:byte);
-var
-    i:byte;
-    x:word;
+procedure ingresar10(x:word;S:byte)
 begin
     writeLn('Ingrese un numero de base decimal: ');
     readLn(x);
@@ -19,8 +10,14 @@ begin
     repeat
         writeLn('Ingrese una base: ');
         readLn(S);
-    until S>1;
+    until S>1; 
+end;
 
+function de10aS (x,S:byte): string;
+var
+    i,resto,N:byte;
+    x:word;
+begin
     if x=0 then
         N:=1
     else
@@ -28,18 +25,13 @@ begin
     
     for i:=N downto 1 do
     begin
-        sadico[i]:= x mod S;
+        resto:= x mod S;
+        if resto>=10 then
+            de10aS[i]:=chr(resto+55)
+        else
+            de10aS[i]:=chr(resto+48);
         x:= x div s;
     end;
-end;
-
-procedure imprimir (sadico: TV; N:byte);
-var
-    i:byte;
-begin
-    for i:=1 to N do
-        write(sadico[i]);
-    writeLn();
 end;
 
 function potencia(x,n:byte):word;
@@ -60,13 +52,16 @@ function potencia(x,n:byte):word;
             potencia:=productoria;
     end;
 
-procedure de_str_a_arr(x:string; var A:TV; var N:byte);
-var
-    i:byte;
+function deCharAByte (x:char):byte;
 begin
-    N:=length(x);
-    for i:=1 to N do
-        val(x[i],A[i]);
+    if x in ['0'..'9'] then
+        deCharAByte:=ord(x)-48
+    else
+        if (x in ['A'..'Z']) or (x in ['a'..'z']) then
+        begin
+            x:=upcase(x);
+            deCharAByte:=ord(x)-55;
+        end;
 end;
 
 function validar(x:string;S:byte):boolean;
@@ -75,25 +70,29 @@ var
 begin
     validar:=true;
     i:=1;
-    val(x[i],caracter);
+    caracter:=deCharAByte(x[i]);
     while (i<=length(x)) and (caracter>=0) and (caracter<S) do
     begin
         i:=i+1;
-        val(x[i],caracter);
+        caracter:=deCharAByte(x[i]);
     end;
         
     if (caracter<0) or (caracter>=S) then
         validar:=false;
 end;
 
-function deSa10 (sadico: TV; N,S:byte):word;
+function deSa10 (sadico: string; S:byte):word;
 var
-    i:byte;
+    N,i,numero:byte;
     suma:word;
 begin
     suma:=0;
+    N:=length(sadico);
     for i:=1 to N do
-        suma:=suma+sadico[i]*potencia(S,N-i);
+    begin
+        numero:=deCharAByte(sadico[i]);
+        suma:=suma+numero*potencia(S,N-i);
+    end;
     deSa10:=suma;
 end;
 
@@ -111,9 +110,8 @@ end;
 // Programa principal
 
 var
-    sadico:TV;
-    N,S,opcion:byte;
-    num:string;
+    S,opcion:byte;
+    sadico,num:string;
 begin
     menu(opcion);
 
@@ -122,12 +120,13 @@ begin
         case opcion of
             1:
             begin
-                de10aS (sadico, N, S);
+                de10aS (sadico, S);
                 writeLn('Numero base ',S,': ');
-                imprimir(sadico, N);
+                writeLn(sadico);
             end;
             2:  
             begin
+                sadico:='';
                 repeat
                     writeLn('Ingrese base: ');
                     readLn(S);
@@ -137,10 +136,8 @@ begin
                     writeLn('Ingrese numero: ');
                     readLn(num);
                 until validar(num,S);
-                
-                de_str_a_arr(num, sadico, N);
 
-                writeLn('Numero base 10: ',deSa10 (sadico, N,S));
+                writeLn('Numero base 10: ',deSa10 (sadico, S));
             end; 
         end;
 
