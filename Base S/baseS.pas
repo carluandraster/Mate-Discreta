@@ -4,7 +4,7 @@ const
     tope=255;
 
 type
-    TV = array [1..tope] of char;
+    TV = array [1..tope] of byte;
 
 // Subprogramas
 
@@ -19,7 +19,7 @@ begin
     repeat
         writeLn('Ingrese una base: ');
         readLn(S);
-    until S>1;
+    until (S>1) and (S<36);
 
     if x=0 then
         N:=1
@@ -38,7 +38,10 @@ var
     i:byte;
 begin
     for i:=1 to N do
-        write(sadico[i]);
+        if sadico[i]>=10 then
+            write(chr(sadico[i]+55))
+        else
+            write(sadico[i]);
     writeLn();
 end;
 
@@ -66,7 +69,26 @@ var
 begin
     N:=length(x);
     for i:=1 to N do
-        val(x[i],A[i]);
+        if x[i] in ['0'..'9'] then
+            val(x[i],A[i])
+        else
+            if (x[i] in ['A'..'Z']) or (x[i] in ['a'..'z']) then
+            begin
+                x[i]:=upcase(x[i]);
+                A[i]:=ord(x[i])-55;
+            end;
+end;
+
+function deCharAByte (x:char):byte;
+begin
+    if x in ['0'..'9'] then
+        deCharAByte:=ord(x)-48
+    else
+        if (x in ['A'..'Z']) or (x in ['a'..'z']) then
+        begin
+            x:=upcase(x);
+            deCharAByte:=ord(x)-55;
+        end;
 end;
 
 function validar(x:string;S:byte):boolean;
@@ -75,14 +97,14 @@ var
 begin
     validar:=true;
     i:=1;
-    val(x[i],caracter);
+    caracter:=deCharAByte(x[i]);
     while (i<=length(x)) and (caracter>=0) and (caracter<S) do
     begin
         i:=i+1;
-        val(x[i],caracter);
+        caracter:=deCharAByte(x[i]);
     end;
         
-    if (caracter<0) or (caracter>=S) then
+    if i<=length(x) then
         validar:=false;
 end;
 
@@ -131,7 +153,7 @@ begin
                 repeat
                     writeLn('Ingrese base: ');
                     readLn(S);
-                until S>1;
+                until (S>1) and (S<36);
 
                 repeat
                     writeLn('Ingrese numero: ');
